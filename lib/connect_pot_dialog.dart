@@ -22,9 +22,17 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
   static const _kCurve = Curves.ease;
 
   static const _scanLengthSeconds = 60;
+  static const _jujuBluetoothPrefix = "JuJuPot-";
+  static const _wifiPrefix = "wifi:: ";
+  static const _passPrefix = "pass:: ";
+  final _serviceUuid = Guid("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
+  final _characteristicUuid = Guid("beb5483e-36e1-4688-b7f5-ea07361b26a8");
 
   Stream<List<ScanResult>> btsr = FlutterBlue.instance.scanResults;
   StreamSubscription<List<ScanResult>>? btsrl;
+
+  BluetoothDevice? btdevice;
+  BluetoothDeviceState btdevicestate = BluetoothDeviceState.disconnected;
 
   late List<Widget> _pages;
 
@@ -62,10 +70,47 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
               ),
             ],
           )),
-      WifiInput(key: wifiFormKey),
+      WifiInput(
+        key: wifiFormKey,
+        onPress: () async {
+          if (btdevice != null &&
+              btdevicestate == BluetoothDeviceState.connected) {
+            BluetoothCharacteristic? d =
+                await _getReadWriteCharacteristic(btdevice);
+
+            String wifi = _wifiPrefix + wifiFormKey.currentState!.wifi;
+            String pass = _passPrefix + wifiFormKey.currentState!.pass;
+
+            d!.setNotifyValue(true);
+            d.write(wifi.codeUnits);
+            d.write(pass.codeUnits);
+
+            print("Complete wifi/password transfer.");
+          }
+        },
+      ),
     ];
 
     super.initState();
+  }
+
+  Future<BluetoothCharacteristic?> _getReadWriteCharacteristic(btdevice) async {
+    List<BluetoothService> services = await btdevice!.discoverServices();
+
+    for (BluetoothService s in services) {
+      print(s.uuid);
+      if (s.uuid == _serviceUuid) {
+        for (BluetoothCharacteristic c in s.characteristics) {
+          if (c.uuid == _characteristicUuid) {
+            print('Characteristic found: ${c.uuid}');
+            return c;
+          }
+        }
+      }
+    }
+
+    print("Error: our Service/Characteristic is not found");
+    return null;
   }
 
   @override
@@ -82,13 +127,18 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
   }
 
   void startBtConnectionListener() {
-    btsrl ??= btsr.listen((event) {
+    btsrl ??= btsr.listen((event) async {
       if (event.isNotEmpty) {
         for (ScanResult d in event) {
-          if (d.device.name.contains("JuJuPot-")) {
+          if (d.device.name.contains(_jujuBluetoothPrefix)) {
             //print("JuJuPot Found! " + d.device.name);
+            //await d.device.connect();
+
             d.device.connect();
-            _controller.animateToPage(1, duration: _kDuration, curve: _kCurve);
+            btdevice = d.device;
+            startConnectedDeviceListener();
+
+            //_controller.animateToPage(1, duration: _kDuration, curve: _kCurve);
 
             //FlutterBlue.instance.stopScan();
             //stopBtConnectionListener();
@@ -103,6 +153,34 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
   void stopBtConnectionListener() {
     btsrl?.cancel();
     btsrl = null;
+  }
+
+  void startConnectedDeviceListener() {
+    if (btdevice != null) {
+      btdevice!.state.listen((event) async {
+        btdevicestate = event;
+        if (event == BluetoothDeviceState.connected && _controller.page != 1) {
+          print("Moving Jujupot to page 1");
+          _controller.animateToPage(1, duration: _kDuration, curve: _kCurve);
+        } else if (event == BluetoothDeviceState.disconnected &&
+            _controller.page != 0) {
+          print("Device disconnected, so moving Jujupot back to page 0");
+          FocusScope.of(context).requestFocus(FocusNode());
+          _controller.animateToPage(0, duration: _kDuration, curve: _kCurve);
+        }
+      });
+    } else {
+      print("Cannot start ConnectedDeviceListener -- btdevice = null");
+    }
+  }
+
+  void destroyDevice() {
+    if (btdevice != null) {
+      btdevice!.disconnect();
+      btdevice = null;
+    } else {
+      print("Cannot destroyDevice -- btdevice = null");
+    }
   }
 
   void showConnectPotDialog(BuildContext context, FlutterBlue bt) => showDialog(

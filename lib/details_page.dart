@@ -131,10 +131,10 @@ class _DetailsPageState extends State<DetailsPage> {
                               topRight: Radius.circular(10.0),
                               bottomLeft: Radius.circular(25.0),
                               bottomRight: Radius.circular(25.0)),
-                          color: Colors.black),
+                          color: Colors.red),
                       height: 50.0,
                       child: const Center(
-                        child: Text('Send Love',
+                        child: Text('Disable Notifications',
                             style: TextStyle(
                                 color: Colors.white, fontFamily: 'Montserrat')),
                       ),

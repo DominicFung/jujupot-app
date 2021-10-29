@@ -8,7 +8,10 @@ import 'package:network_info_plus/network_info_plus.dart';
 class WifiInput extends StatefulWidget {
   const WifiInput({
     Key? key,
+    this.onPress,
   }) : super(key: key);
+
+  final VoidCallback? onPress;
 
   @override
   WifiInputState createState() => WifiInputState();
@@ -135,6 +138,7 @@ class WifiInputState extends State<WifiInput> {
 
     if (form.validate()) {
       form.save();
+      widget.onPress!();
       setState(() => shouldSendToFW = true);
     }
   }
