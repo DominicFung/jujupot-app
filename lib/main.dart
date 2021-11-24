@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jujupot_app_v1/details_page.dart';
-import 'package:jujupot_app_v1/connect_pot_dialog.dart';
+import 'package:jujupot_app_v1/connect_pot/connect_pot_dialog.dart';
+import 'package:jujupot_app_v1/login/login.dart';
+import 'package:jujupot_app_v1/login/service/type_login.dart';
 
 void main() {
   runApp(const JujuApp());
@@ -15,7 +17,7 @@ class JujuApp extends StatelessWidget {
     return MaterialApp(
       title: 'Juju Pot',
       theme: ThemeData(
-        primarySwatch: Colors.pink,
+        primarySwatch: Colors.brown,
       ),
       home: const HomePage(title: 'Juju-Pot'),
       debugShowCheckedModeBanner: false,
@@ -32,7 +34,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  static const primaryCol = Color(0xfffec5bb);
+  static const primaryCol = Color(0xffccd5ae);
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +60,17 @@ class _HomePageState extends State<HomePage> {
                         const ConnectPotDialog(),
                         //const Icon(Icons.bluetooth_searching_rounded)),
                         IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => Login(
+                                      pathLogo: 'assets/pot-logo.png',
+                                      typeLoginModel: [
+                                        TypeLoginModel(
+                                            logo: TypeLogo.facebook,
+                                            callFunction: () => {}),
+                                      ],
+                                    )));
+                          },
                           color: Colors.white,
                           icon: const Icon(Icons.login_rounded),
                         ),
@@ -111,13 +123,13 @@ class _HomePageState extends State<HomePage> {
                         height: 600,
                         child: ListView(
                           children: [
-                            _buildJujuPot('assets/plate1.png', 'Burro\'s Tail',
+                            _buildJujuPot('assets/pot1.png', 'Burro\'s Tail',
                                 'Sedum Morganianum', '', 12),
-                            _buildJujuPot('assets/plate2.png',
-                                'Crown of Thorns', '', '', 100),
-                            _buildJujuPot('assets/plate6.png',
+                            _buildJujuPot('assets/pot2.png', 'Crown of Thorns',
+                                '', '', 100),
+                            _buildJujuPot('assets/pot3.png',
                                 'Flaming Katy (kal...', '', '', 20),
-                            _buildJujuPot('assets/plate5.png',
+                            _buildJujuPot('assets/pot4.png',
                                 'Aloe Vera (aloe vera)', '', '', 53),
                           ],
                         ),
@@ -197,11 +209,14 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 Hero(
                     tag: imgPath,
-                    child: Image(
-                        image: AssetImage(imgPath),
-                        fit: BoxFit.cover,
-                        height: 75.0,
-                        width: 75.0)),
+                    child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20.0),
+                        child: Image(
+                            semanticLabel: imgPath,
+                            image: AssetImage(imgPath),
+                            fit: BoxFit.contain,
+                            height: 75.0,
+                            width: 75.0))),
                 const SizedBox(width: 10.0),
                 Expanded(
                   child: Column(
@@ -227,21 +242,21 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.all(8),
                     child: Container(
                         decoration: const BoxDecoration(
-                            color: Color(0xffF8EDEB), shape: BoxShape.circle),
+                            color: Color(0xfffaedcd), shape: BoxShape.circle),
                         child: Center(
                             child: Stack(
                                 alignment: Alignment.center,
                                 children: <Widget>[
                               const Padding(
                                   padding: EdgeInsets.all(8),
-                                  child: Icon(Icons.favorite_rounded,
+                                  child: Icon(Icons.eco_rounded,
                                       color: primaryCol, size: 30)),
                               Text(health.toString() + "%",
                                   style: const TextStyle(
                                       fontFamily: 'Montserrat',
                                       fontSize: 12.0,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.blueGrey)),
+                                      color: Color(0xffd4a373))),
                             ])))),
                 IconButton(
                     icon: const Icon(Icons.chevron_right_rounded),

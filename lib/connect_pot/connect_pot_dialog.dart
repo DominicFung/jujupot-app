@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:jujupot_app_v1/connect_pot/bluetooth_disabled_screen.dart';
 
-import 'connect_pot/wifi_input.dart';
+import 'wifi_input.dart';
 
 class ConnectPotDialog extends StatefulWidget {
   const ConnectPotDialog({Key? key}) : super(key: key);
@@ -246,7 +246,7 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
                       color: Colors.transparent,
                       padding: const EdgeInsets.all(20.0),
                       child: DotsIndicator(
-                        color: const Color(0xfffec5bb),
+                        color: const Color(0xffccd5ae),
                         controller: _controller,
                         itemCount: _pages.length,
                         onPageSelected: (int page) {

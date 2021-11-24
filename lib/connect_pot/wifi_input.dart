@@ -119,7 +119,7 @@ class WifiInputState extends State<WifiInput> {
                               topRight: Radius.circular(10.0),
                               bottomLeft: Radius.circular(25.0),
                               bottomRight: Radius.circular(25.0)),
-                          color: Color(0xfffec5bb)),
+                          color: Color(0xffccd5ae)),
                       height: 50.0,
                       child: const Center(
                         child: Text('Submit',

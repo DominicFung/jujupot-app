@@ -24,7 +24,7 @@ class _DetailsPageState extends State<DetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF7A9BEE),
+      backgroundColor: const Color(0xffd4a373),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0.0,
@@ -70,16 +70,18 @@ class _DetailsPageState extends State<DetailsPage> {
               top: 30,
               left: (MediaQuery.of(context).size.width / 2) - 100,
               child: Hero(
-                tag: widget.heroTag,
-                child: Container(
-                  decoration: BoxDecoration(
-                      image: DecorationImage(
-                          image: AssetImage(widget.heroTag),
-                          fit: BoxFit.cover)),
-                  height: 200,
-                  width: 200,
-                ),
-              )),
+                  tag: widget.heroTag,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(50.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: AssetImage(widget.heroTag),
+                              fit: BoxFit.cover)),
+                      height: 200,
+                      width: 200,
+                    ),
+                  ))),
           Positioned(
               top: 250,
               left: 25,
@@ -98,7 +100,7 @@ class _DetailsPageState extends State<DetailsPage> {
                           height: 20,
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(17),
-                              color: const Color(0xFF7A9BEE)),
+                              color: const Color(0xffd4a373)),
                           child: Padding(
                             padding: const EdgeInsets.only(
                                 top: 1.5, left: 7, right: 7),
@@ -131,7 +133,7 @@ class _DetailsPageState extends State<DetailsPage> {
                               topRight: Radius.circular(10.0),
                               bottomLeft: Radius.circular(25.0),
                               bottomRight: Radius.circular(25.0)),
-                          color: Colors.red),
+                          color: Color(0xffd4a373)),
                       height: 50.0,
                       child: const Center(
                         child: Text('Disable Notifications',
@@ -160,7 +162,7 @@ class _DetailsPageState extends State<DetailsPage> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10.0),
                   color: sensorTitle == selectedCard
-                      ? const Color(0xFF7A9BEE)
+                      ? const Color(0xffd4a373)
                       : Colors.white,
                   border: Border.all(
                       color: sensorTitle == selectedCard

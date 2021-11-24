@@ -68,6 +68,17 @@ flutter:
     - assets/plate5.png
     - assets/plate6.png
 
+    - assets/pot1.png
+    - assets/pot2.png
+    - assets/pot3.png
+    - assets/pot4.png
+
+    - assets/pot-logo.png
+
+    - assets/login/facebook.png
+    - assets/login/google.png
+    - assets/login/apple.png
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
