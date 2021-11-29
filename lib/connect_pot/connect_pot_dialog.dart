@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:jujupot_app_v1/connect_pot/bluetooth_disabled_screen.dart';
-
-import 'wifi_input.dart';
+import 'package:jujupot_app_v1/connect_pot/test_pot_connected.dart';
+import 'package:jujupot_app_v1/connect_pot/wifi_input.dart';
 
 class ConnectPotDialog extends StatefulWidget {
-  const ConnectPotDialog({Key? key}) : super(key: key);
+  const ConnectPotDialog({Key? key, this.addToList}) : super(key: key);
+
+  final Function? addToList;
 
   @override
   _ConnectPotDialogState createState() => _ConnectPotDialogState();
@@ -16,6 +18,8 @@ class ConnectPotDialog extends StatefulWidget {
 
 class _ConnectPotDialogState extends State<ConnectPotDialog> {
   final GlobalKey<WifiInputState> wifiFormKey = GlobalKey<WifiInputState>();
+  final GlobalKey<TestPotConnectedState> testPotKey =
+      GlobalKey<TestPotConnectedState>();
 
   final _controller = PageController();
   static const _kDuration = Duration(milliseconds: 300);
@@ -31,7 +35,6 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
   static const _user = "9b96f150-d2fc-459c-9872-484124d475e8";
 
   final _serviceUuid = Guid("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
-  //final _characteristicReadUuid = Guid("e446ecdf-a341-42d9-bc88-bd6809cbb758");
   final _characteristicWriteUuid = Guid("beb5483e-36e1-4688-b7f5-ea07361b26a8");
 
   Stream<List<ScanResult>> btsr = FlutterBlue.instance.scanResults;
@@ -43,6 +46,9 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
   late List<Widget> _pages;
 
   String productId = "";
+
+  // STATES
+  bool _passCommission = false;
 
   @override
   void initState() {
@@ -94,7 +100,6 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
             List<int> rawChars = await btw.read();
             print('raw chars from ESP32: $rawChars');
 
-            //TODO: productId is currently in the form "product:: UUID" - parse out product::
             productId = String.fromCharCodes(rawChars);
             print('Juju Pot ID: $productId');
 
@@ -104,9 +109,24 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
             btw.write(user.codeUnits);
 
             print("Complete wifi/password transfer.");
+
+            productId =
+                productId.replaceAll("product::", "").replaceAll(" ", "");
+            //widget.addToList!(productId);
+
+            setState(() {
+              _passCommission = true;
+            });
           }
         },
       ),
+      TestPotConnected(
+          key: testPotKey,
+          cloudConnectComplete: () async {
+            print("product to be added to the list: $productId");
+            widget.addToList!(productId);
+            Navigator.of(context).pop();
+          })
     ];
 
     super.initState();
@@ -130,24 +150,6 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
     return null;
   }
 
-  // Future<BluetoothCharacteristic?> _getReadCharacteristic(btdevice) async {
-  //   List<BluetoothService> services = await btdevice!.discoverServices();
-
-  //   for (BluetoothService s in services) {
-  //     if (s.uuid == _serviceUuid) {
-  //       for (BluetoothCharacteristic c in s.characteristics) {
-  //         if (c.uuid == _characteristicReadUuid) {
-  //           print('Read Characteristic found: ${c.uuid}');
-  //           return c;
-  //         }
-  //       }
-  //     }
-  //   }
-
-  //   print("Error: our Service/Characteristic is not found");
-  //   return null;
-  // }
-
   @override
   Widget build(BuildContext context) {
     return IconButton(
@@ -166,19 +168,9 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
       if (event.isNotEmpty) {
         for (ScanResult d in event) {
           if (d.device.name.contains(_jujuBluetoothPrefix)) {
-            //print("JuJuPot Found! " + d.device.name);
-            //await d.device.connect();
-
             d.device.connect();
             btdevice = d.device;
             startConnectedDeviceListener();
-
-            //_controller.animateToPage(1, duration: _kDuration, curve: _kCurve);
-
-            //FlutterBlue.instance.stopScan();
-            //stopBtConnectionListener();
-          } else {
-            //print(d.device.name);
           }
         }
       }
@@ -194,7 +186,10 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
     if (btdevice != null) {
       btdevice!.state.listen((event) async {
         btdevicestate = event;
-        if (event == BluetoothDeviceState.connected && _controller.page != 1) {
+        if (_passCommission) {
+          _controller.animateToPage(2, duration: _kDuration, curve: _kCurve);
+        } else if (event == BluetoothDeviceState.connected &&
+            _controller.page != 1) {
           print("Moving Jujupot to page 1");
           _controller.animateToPage(1, duration: _kDuration, curve: _kCurve);
         } else if (event == BluetoothDeviceState.disconnected &&
@@ -220,6 +215,8 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
 
   void showConnectPotDialog(BuildContext context, FlutterBlue bt) => showDialog(
       context: context,
+      barrierDismissible:
+          false, // We cannot set dismissable half way (Nov 28 2021)
       builder: (BuildContext context) {
         return StreamBuilder<BluetoothState>(
             stream: FlutterBlue.instance.state,
@@ -228,7 +225,21 @@ class _ConnectPotDialogState extends State<ConnectPotDialog> {
               final state = snapshot.data;
               if (state == BluetoothState.on) {
                 return SimpleDialog(
-                  title: const Text('Connect your pot!'),
+                  title: Row(children: [
+                    const Expanded(
+                      child: Text('Connect your pot!'),
+                    ),
+                    _passCommission
+                        ? IconButton(
+                            onPressed: () {
+                              if (!_passCommission) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            icon: const Icon(Icons.close))
+                        : const SizedBox.shrink()
+                  ]),
+                  titlePadding: const EdgeInsets.fromLTRB(16.0, 12.0, 0.0, 0.0),
                   children: <Widget>[
                     SizedBox(
                       height: 350,
