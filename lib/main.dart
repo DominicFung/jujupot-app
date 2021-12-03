@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+
+import 'package:amplify_flutter/amplify.dart';
+import 'package:amplify_api/amplify_api.dart';
+
 import 'package:jujupot_app_v1/details_page.dart';
 import 'package:jujupot_app_v1/connect_pot/connect_pot_dialog.dart';
 import 'package:jujupot_app_v1/login/login.dart';
 import 'package:jujupot_app_v1/login/service/type_login.dart';
+
+import 'package:jujupot_app_v1/model/user.dart';
+
+import 'package:jujupot_app_v1/amplifyconfiguration.dart';
 
 void main() {
   runApp(const JujuApp());
@@ -35,6 +43,86 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   static const primaryCol = Color(0xffccd5ae);
+  // static final Future<SharedPreferences> _prefs =
+  //     SharedPreferences.getInstance();
+
+  late User user;
+
+  @override
+  void initState() {
+    super.initState();
+    _configureAmplify();
+  }
+
+  void _configureAmplify() async {
+    // Add the following line to add API plugin to your app.
+    // Auth plugin needed for IAM authorization mode, which is default for REST API.
+    try {
+      Amplify.addPlugins([AmplifyAPI()]);
+      //String config = json.encode(await rootBundle.loadString(amplifyConfig));
+
+      await Amplify.configure(amplifyconfig);
+    } on AmplifyAlreadyConfiguredException {
+      print(
+          "Tried to reconfigure Amplify; this can occur when your app restarts on Android.");
+    }
+
+    //final SharedPreferences prefs = await _prefs;
+    user = await User().init();
+    print(user.error);
+
+    if (user.error.isNotEmpty) {
+      if (user.error.contains("Invalid access key")) {
+        _showUserAccessKeyRevokeError();
+      } else {
+        print("This is some other error we don't know about.");
+      }
+    }
+  }
+
+  Future<void> _showUserAccessKeyRevokeError() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Account Disabled.'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Padding(
+                  padding: EdgeInsets.only(bottom: 20.0),
+                  child: Text('We believe your account has been hacked.'),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 20.0),
+                  child: Text(
+                      'Click "Learn More" to learn more about how to recover your account/contact us for assistance.'),
+                ),
+                Text(
+                    'Click "Reset" to reset your app. WARNING! This will delete all your data.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Learn More'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Reset'),
+              onPressed: () {
+                user.createGuestUser();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
