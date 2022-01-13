@@ -1,4 +1,10 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:amplify_api/amplify_api.dart';
+import 'package:amplify_flutter/amplify.dart';
 import 'package:flutter/material.dart';
+import 'model/user.dart';
 
 class DetailsPage extends StatefulWidget {
   const DetailsPage(
@@ -6,7 +12,9 @@ class DetailsPage extends StatefulWidget {
       required this.heroTag,
       required this.potName,
       required this.potDesign,
-      required this.potSpecies})
+      required this.potSpecies,
+      required this.deviceId,
+      required this.user})
       : super(key: key);
 
   final String heroTag;
@@ -14,12 +22,43 @@ class DetailsPage extends StatefulWidget {
   final String potDesign;
   final String potSpecies;
 
+  final String deviceId;
+  final User user;
+
   @override
   _DetailsPageState createState() => _DetailsPageState();
 }
 
 class _DetailsPageState extends State<DetailsPage> {
   var selectedCard = 'WEIGHT';
+
+  Future<String> updateDeviceControllable(
+      String deviceId, String controllableId, String key, String value) async {
+    String body = json
+        .encode({"controllableId": controllableId, "key": key, "value": value});
+
+    print(body);
+
+    RestOptions options = RestOptions(
+        path: '/user/guest/device/controllable/$deviceId',
+        headers: {
+          'hommieo-user-id': widget.user.userId,
+          'hommieo-access-token': widget.user.getAccessKey()
+        },
+        body: Uint8List.fromList(body.codeUnits));
+
+    RestResponse response;
+    try {
+      RestOperation restOperation = Amplify.API.post(restOptions: options);
+      response = await restOperation.response;
+    } on RestException catch (e) {
+      print(e.toString());
+      return e.toString();
+    }
+
+    print(response.body);
+    return response.body;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,27 +157,36 @@ class _DetailsPageState extends State<DetailsPage> {
                       child: ListView(
                           scrollDirection: Axis.horizontal,
                           children: <Widget>[
-                            _buildInfoCard('Moisture', '20', '%'),
-                            _buildInfoCard('Moisture', '20', '%'),
-                            _buildInfoCard('Moisture', '20', '%'),
-                            _buildInfoCard('Moisture', '20', '%'),
+                            _buildInfoCard('Moisture', '5', '%'),
+                            _buildInfoCard('Light Sensor 1', '25', '%'),
+                            _buildInfoCard('Light Sensor 2', '22', '%'),
+                            _buildInfoCard('Light Sensor 3', '19', '%'),
                           ])),
                   const SizedBox(height: 20.0),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 5.0),
-                    child: Container(
-                      decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10.0),
-                              topRight: Radius.circular(10.0),
-                              bottomLeft: Radius.circular(25.0),
-                              bottomRight: Radius.circular(25.0)),
-                          color: Color(0xffd4a373)),
-                      height: 50.0,
-                      child: const Center(
-                        child: Text('Disable Notifications',
-                            style: TextStyle(
-                                color: Colors.white, fontFamily: 'Montserrat')),
+                    child: TextButton(
+                      onPressed: () {
+                        print("Pressed update controllable");
+                        print(widget.deviceId);
+                        updateDeviceControllable("hommieo_" + widget.deviceId,
+                            'ledv1-1', 'v', 'FFFFFF');
+                      },
+                      child: Container(
+                        decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10.0),
+                                topRight: Radius.circular(10.0),
+                                bottomLeft: Radius.circular(25.0),
+                                bottomRight: Radius.circular(25.0)),
+                            color: Color(0xffd4a373)),
+                        height: 50.0,
+                        child: const Center(
+                          child: Text('Turn On Light',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Montserrat')),
+                        ),
                       ),
                     ),
                   )

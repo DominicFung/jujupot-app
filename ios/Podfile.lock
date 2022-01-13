@@ -28,18 +28,19 @@ PODS:
     - AWSPluginsCore (= 1.15.6)
   - AppSyncRealTimeClient (1.6.0):
     - Starscream (~> 3.1.1)
-  - AWSAuthCore (2.26.5):
-    - AWSCore (= 2.26.5)
-  - AWSCognitoIdentityProvider (2.26.5):
-    - AWSCognitoIdentityProviderASF (= 2.26.5)
-    - AWSCore (= 2.26.5)
-  - AWSCognitoIdentityProviderASF (2.26.5)
-  - AWSCore (2.26.5)
-  - AWSMobileClient (2.26.5):
-    - AWSAuthCore (= 2.26.5)
-    - AWSCognitoIdentityProvider (= 2.26.5)
-    - AWSCognitoIdentityProviderASF (= 2.26.5)
-    - AWSCore (= 2.26.5)
+  - AWSAuthCore (2.26.7):
+    - AWSCore (= 2.26.7)
+  - AWSCognitoIdentityProvider (2.26.7):
+    - AWSCognitoIdentityProviderASF (= 2.26.7)
+    - AWSCore (= 2.26.7)
+  - AWSCognitoIdentityProviderASF (2.26.7):
+    - AWSCore (= 2.26.7)
+  - AWSCore (2.26.7)
+  - AWSMobileClient (2.26.7):
+    - AWSAuthCore (= 2.26.7)
+    - AWSCognitoIdentityProvider (= 2.26.7)
+    - AWSCognitoIdentityProviderASF (= 2.26.7)
+    - AWSCore (= 2.26.7)
   - AWSPluginsCore (1.15.6):
     - Amplify (= 1.15.6)
     - AWSCore (~> 2.26.1)
@@ -103,11 +104,11 @@ SPEC CHECKSUMS:
   amplify_flutter: 372e5d0210d6de0cbf7be025dbd20cc21831ab24
   AmplifyPlugins: 7cfe5a34e97c6091855c10d83ccda538fb371cd1
   AppSyncRealTimeClient: 8b5ec94085b8ee9bb6fb9d9d76a157beb538ec6f
-  AWSAuthCore: ac6f2bf01b136251f816ca99a21f142d4a1a17ef
-  AWSCognitoIdentityProvider: c7983af57977cf463041e818e3e0414add5dd02b
-  AWSCognitoIdentityProviderASF: e34812b1308d41a0d026ab5d54693fdc93e412b3
-  AWSCore: e84c89bded6fae98ae9c297c71f10f2c87eedc3d
-  AWSMobileClient: 29692a65143c9262e37a2a1c4d4c58c6bc2a85c3
+  AWSAuthCore: e987fce9ad13ef8ac7d39d82305af21a63c590cf
+  AWSCognitoIdentityProvider: 94cb0197e41662e3d29ee0feeb0cfa10d2242302
+  AWSCognitoIdentityProviderASF: 306610c6b2df9a0449243911a67d44b49d0a708f
+  AWSCore: e7fc9a005c527f2623b699a3ff8595fc45c24bd9
+  AWSMobileClient: 318f7388a20424d2fe47fc946e3ba9b722b040b8
   AWSPluginsCore: 46b75ee57b0a1f10d64f4fa6b3b4153f5900dd4f
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   flutter_blue: eeb381dc4727a0954dede73515f683865494b370

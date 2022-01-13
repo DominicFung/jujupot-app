@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:amplify_flutter/amplify.dart';
@@ -11,6 +13,8 @@ import 'package:jujupot_app_v1/login/service/type_login.dart';
 import 'package:jujupot_app_v1/model/user.dart';
 
 import 'package:jujupot_app_v1/amplifyconfiguration.dart';
+
+import 'model/pot.dart';
 
 void main() {
   runApp(const JujuApp());
@@ -43,40 +47,44 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   static const primaryCol = Color(0xffccd5ae);
-  // static final Future<SharedPreferences> _prefs =
-  //     SharedPreferences.getInstance();
 
-  late User user;
+  List<Pot> pots = [];
+  User? user;
 
   @override
   void initState() {
     super.initState();
-    _configureAmplify();
+    _operationsOrder();
   }
 
-  void _configureAmplify() async {
+  void _operationsOrder() async {
+    await _configureAmplify();
+    await listUserDevices(user!.userId, user!.getAccessKey());
+  }
+
+  Future<void> _configureAmplify() async {
     // Add the following line to add API plugin to your app.
     // Auth plugin needed for IAM authorization mode, which is default for REST API.
     try {
       Amplify.addPlugins([AmplifyAPI()]);
-      //String config = json.encode(await rootBundle.loadString(amplifyConfig));
-
       await Amplify.configure(amplifyconfig);
     } on AmplifyAlreadyConfiguredException {
       print(
           "Tried to reconfigure Amplify; this can occur when your app restarts on Android.");
     }
 
-    //final SharedPreferences prefs = await _prefs;
     user = await User().init();
-    print(user.error);
-
-    if (user.error.isNotEmpty) {
-      if (user.error.contains("Invalid access key")) {
+    if (user!.error.isNotEmpty) {
+      if (user!.error.contains("Invalid access key")) {
         _showUserAccessKeyRevokeError();
       } else {
         print("This is some other error we don't know about.");
       }
+    } else {
+      print("User is logged in. User: ${user!.userId}");
+      setState(() {
+        user = user;
+      });
     }
   }
 
@@ -114,7 +122,7 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               child: const Text('Reset'),
               onPressed: () {
-                user.createGuestUser();
+                user!.createGuestUser();
                 Navigator.of(context).pop();
               },
             ),
@@ -122,6 +130,36 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
+  }
+
+  Future<void> listUserDevices(String userId, String accessToken) async {
+    print(" $userId, $accessToken");
+    RestOptions options = RestOptions(
+        path: '/user/guest/device/list',
+        headers: {
+          'hommieo-user-id': userId,
+          'hommieo-access-token': accessToken
+        });
+
+    RestResponse response;
+    try {
+      RestOperation restOperation = Amplify.API.get(restOptions: options);
+      response = await restOperation.response;
+    } on RestException catch (e) {
+      print(e.toString());
+      return;
+    }
+
+    List<dynamic> rawdata = json.decode(response.body) as List<dynamic>;
+    print(rawdata);
+    for (Map<String, dynamic> rawpot in rawdata) {
+      Pot pot = Pot.fromJson(rawpot);
+      pots.add(pot);
+    }
+
+    setState(() {
+      pots = pots;
+    });
   }
 
   @override
@@ -137,7 +175,7 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 IconButton(
                   icon: const Icon(Icons.arrow_back_ios),
-                  color: Colors.white,
+                  color: Colors.grey,
                   onPressed: () {},
                 ),
                 SizedBox(
@@ -145,8 +183,20 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        const ConnectPotDialog(),
-                        //const Icon(Icons.bluetooth_searching_rounded)),
+                        user != null
+                            ? ConnectPotDialog(
+                                user: user!,
+                                updateUserDevices: () async {
+                                  await listUserDevices(
+                                      user!.userId, user!.getAccessKey());
+                                },
+                              )
+                            : IconButton(
+                                onPressed: () {
+                                  return;
+                                },
+                                color: Colors.white,
+                                icon: const Icon(Icons.add_rounded)),
                         IconButton(
                           onPressed: () {
                             Navigator.of(context).push(MaterialPageRoute(
@@ -178,17 +228,6 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.white,
                           fontSize: 25.0)),
                   SizedBox(width: 10),
-                  // Text('JujuPots',
-                  //     style: TextStyle(
-                  //         fontFamily: 'Montserrat',
-                  //         color: Colors.white,
-                  //         fontWeight: FontWeight.bold,
-                  //         fontSize: 25.0)),
-                  // Text('!',
-                  //     style: TextStyle(
-                  //         fontFamily: 'Montserrat',
-                  //         color: Colors.white,
-                  //         fontSize: 25.0))
                 ],
               )),
           const SizedBox(height: 40.0),
@@ -210,17 +249,27 @@ class _HomePageState extends State<HomePage> {
                       child: SizedBox(
                         height: 600,
                         child: ListView(
-                          children: [
-                            _buildJujuPot('assets/pot1.png', 'Burro\'s Tail',
-                                'Sedum Morganianum', '', 12),
-                            _buildJujuPot('assets/pot2.png', 'Crown of Thorns',
-                                '', '', 100),
-                            _buildJujuPot('assets/pot3.png',
-                                'Flaming Katy (kal...', '', '', 20),
-                            _buildJujuPot('assets/pot4.png',
-                                'Aloe Vera (aloe vera)', '', '', 53),
-                          ],
-                        ),
+                            children: List.generate(pots.length, (i) {
+                          int num = (i % 4) + 1;
+                          return _buildJujuPot(
+                              "assets/pot$num.png",
+                              pots[i].title,
+                              "aloe vera",
+                              '',
+                              41,
+                              pots[i].potId);
+                        })
+                            // children: [
+                            //   _buildJujuPot('assets/pot1.png', 'Burro\'s Tail',
+                            //       'Sedum Morganianum', '', 12),
+                            //   _buildJujuPot('assets/pot2.png', 'Crown of Thorns',
+                            //       '', '', 100),
+                            //   _buildJujuPot('assets/pot3.png',
+                            //       'Flaming Katy (kal...', '', '', 20),
+                            //   _buildJujuPot('assets/pot4.png',
+                            //       'Aloe Vera (aloe vera)', '', '', 53),
+                            // ],
+                            ),
                       )),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -280,7 +329,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildJujuPot(String imgPath, String name, String species,
-      String design, double health) {
+      String design, double health, String deviceId) {
     return Padding(
         padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
         child: InkWell(
@@ -290,7 +339,9 @@ class _HomePageState extends State<HomePage> {
                       heroTag: imgPath,
                       potName: name,
                       potDesign: design,
-                      potSpecies: species)));
+                      potSpecies: species,
+                      deviceId: deviceId,
+                      user: user ?? NoneUser())));
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -355,7 +406,9 @@ class _HomePageState extends State<HomePage> {
                               heroTag: imgPath,
                               potName: name,
                               potDesign: design,
-                              potSpecies: species)));
+                              potSpecies: species,
+                              deviceId: deviceId,
+                              user: user ?? NoneUser())));
                     })
               ],
             )));

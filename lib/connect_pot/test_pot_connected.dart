@@ -12,6 +12,11 @@ class TestPotConnected extends StatefulWidget {
 
 class TestPotConnectedState extends State<TestPotConnected> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
         constraints: const BoxConstraints.expand(width: 200, height: 200),
@@ -27,7 +32,7 @@ class TestPotConnectedState extends State<TestPotConnected> {
             const Padding(
                 padding: EdgeInsets.only(top: 20.0, bottom: 5.0),
                 child: Text(
-                  "Please wait as your pot connects to the cloud. It should lightup once done!",
+                  "Congradulations! Your Device is attached and registered in the cloud!",
                   textAlign: TextAlign.center,
                   style: TextStyle(fontFamily: 'Montserrat', fontSize: 15),
                 )),
@@ -35,7 +40,6 @@ class TestPotConnectedState extends State<TestPotConnected> {
               padding: const EdgeInsets.only(bottom: 5.0),
               child: TextButton(
                 onPressed: () {
-                  // should be called AFTER cloud verified.
                   widget.cloudConnectComplete!();
                 },
                 child: Container(
@@ -48,7 +52,7 @@ class TestPotConnectedState extends State<TestPotConnected> {
                       color: Color(0xffccd5ae)),
                   height: 50.0,
                   child: const Center(
-                    child: Text('Please Wait ..',
+                    child: Text('Done!',
                         style: TextStyle(
                             color: Colors.white, fontFamily: 'Montserrat')),
                   ),

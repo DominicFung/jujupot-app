@@ -15,11 +15,15 @@ class User {
   static const String _userAccessKey = "userAccess";
   static const String _userCognitoIdKey = "userCognitoId";
 
+  // needs to be overwritten
+  String getAccessKey() {
+    return "";
+  }
+
   static final Future<SharedPreferences> _prefs =
       SharedPreferences.getInstance();
 
   User() : userId = "";
-  User.none() : userId = "";
 
   Future<User> init() async {
     final SharedPreferences prefs = await _prefs;
@@ -47,7 +51,7 @@ class User {
       return u;
     } else {
       loading = false;
-      return User.none();
+      return NoneUser();
     }
   }
 
@@ -70,7 +74,7 @@ class User {
       print("UserId or AccessKey is empty!");
       // prefs.setString(_userIdKey, "");
       // prefs.setString(_userAccessKey, "");
-      return User.none();
+      return NoneUser();
     }
   }
 
@@ -91,7 +95,7 @@ class User {
       response = await restOperation.response;
     } on RestException catch (e) {
       print(e.response.body);
-      User u = User.none();
+      User u = NoneUser();
       u.error = e.response.body;
       return u;
     }
@@ -105,9 +109,7 @@ class User {
       prefs.setString(_userAccessKey, newAccessKey);
       return GuestUser(userId, newAccessKey);
     } else {
-      // prefs.setString(_userIdKey, "");
-      // prefs.setString(_userAccessKey, "");
-      return User.none();
+      return NoneUser();
     }
   }
 }
@@ -128,12 +130,31 @@ class GuestUser extends User {
       'accessKey': userAccess as dynamic,
     };
   }
+
+  @override
+  String getAccessKey() {
+    return userAccess;
+  }
 }
 
 class AuthenticatedUser extends User {
   late String cognitoId;
 
   AuthenticatedUser(userId, this.cognitoId) : super();
+
+  @override
+  String getAccessKey() {
+    return "";
+  }
+}
+
+class NoneUser extends User {
+  NoneUser() : super();
+
+  @override
+  String getAccessKey() {
+    return "";
+  }
 }
 
 //class GuestUser extends User {}
