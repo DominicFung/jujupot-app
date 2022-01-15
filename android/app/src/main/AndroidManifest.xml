@@ -2,7 +2,7 @@
     package="com.example.jujupot_app_v1">
    <application
         android:label="jujupot_app_v1"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
