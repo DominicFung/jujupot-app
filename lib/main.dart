@@ -370,7 +370,7 @@ class _HomePageState extends State<HomePage> {
                                 fontFamily: 'Montserrat',
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold)),
-                        Text(species,
+                        Text(deviceId,
                             style: const TextStyle(
                                 fontFamily: 'Montserrat',
                                 fontSize: 10,
