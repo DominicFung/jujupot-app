@@ -6,10 +6,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:amplify_flutter/amplify.dart';
 import 'package:amplify_api/amplify_api.dart';
 
+import 'package:jujupot_app_v1/hommieoconfiguration.dart';
+
 class User {
   bool loading = true;
   String error = "";
   String userId;
+
+  String appId = "";
+  String appSecret = "";
 
   static const String _userIdKey = "userId";
   static const String _userAccessKey = "userAccess";
@@ -26,6 +31,22 @@ class User {
   User() : userId = "";
 
   Future<User> init() async {
+    // -- Read Hommieo configurations -- //
+    Map<String, dynamic> hommieoApp = jsonDecode(hommieoconfig);
+    if (hommieoApp.containsKey("appId")) {
+      appId = hommieoApp["appId"];
+    } else {
+      throw "No appId found in hommieoconfig.json";
+    }
+
+    if (hommieoApp.containsKey("appSecret")) {
+      appSecret = hommieoApp["appSecret"];
+    } else {
+      throw "No appSecret found in hommieoconfig.json";
+    }
+
+    print("appId: $appId, appSecret: $appSecret");
+
     final SharedPreferences prefs = await _prefs;
 
     String savedUserId = prefs.getString(_userIdKey) ?? "";
@@ -58,7 +79,10 @@ class User {
   Future<User> createGuestUser() async {
     final SharedPreferences prefs = await _prefs;
 
-    RestOptions options = const RestOptions(path: '/user/guest/create');
+    RestOptions options = RestOptions(path: '/user/guest/create', headers: {
+      'hommieo-app-identity': appId,
+      'hommieo-app-secret': appSecret
+    });
     RestOperation restOperation = Amplify.API.post(restOptions: options);
     RestResponse response = await restOperation.response;
     print(response.body);
