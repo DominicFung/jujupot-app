@@ -1,4 +1,8 @@
-# jujupot App
+# Jujupot App
+
+This is a demo for the Hommie.io Platform! We enable makers (woodworkers / furniture makers / hobbyist) to integrate IOT while keeping their own branding!
+
+[version]:       https://img.shields.io/badge/version-0.1-green
 
 ## Getting hommieoconfiguration.dart
 Go to the [Hommie.io Makers Portal](https://makers.hommie.io)
