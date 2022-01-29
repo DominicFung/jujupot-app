@@ -12,7 +12,8 @@ import 'package:jujupot_app_v1/login/service/type_login.dart';
 
 import 'package:jujupot_app_v1/model/user.dart';
 
-import 'package:jujupot_app_v1/amplifyconfiguration.dart';
+//import 'package:jujupot_app_v1/amplifyconfiguration.dart';
+import 'package:jujupot_app_v1/hommieoconfiguration.dart';
 
 import 'model/pot.dart';
 
@@ -150,6 +151,7 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
+    pots = []; // reset the list
     List<dynamic> rawdata = json.decode(response.body) as List<dynamic>;
     print(rawdata);
     for (Map<String, dynamic> rawpot in rawdata) {
