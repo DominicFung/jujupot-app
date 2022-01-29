@@ -1,6 +1,10 @@
-# Jujupot App
+# Jujupot App ![version]
+https://github.com/DominicFung/jujupot-app/blob/master/assets/icon/icon.png
 
-This is a demo for the Hommie.io Platform! We enable makers (woodworkers / furniture makers / hobbyist) to integrate IOT while keeping their own branding!
+<img src="https://github.com/DominicFung/jujupot-app/blob/master/assets/icon/icon.png?raw=true" align="right" style="border-radius: 25px; margin-left: 30px;"
+     alt="Loggistical.ly logo by Dom Fung" width="150" height="150">
+
+This is a demo for the Hommie.io Platform! We enable makers (woodworkers / furniture makers / hobbyist) to integrate IOT while keeping their own branding! No more directing your customers to Philips Hue Smart light app - bring your own brand to the game.
 
 [version]:       https://img.shields.io/badge/version-0.1-green
 
